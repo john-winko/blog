@@ -28,7 +28,7 @@ twitter_username: JohnWinko
 github_username:  john-winko
 
 # Build settings
-theme: midnight
+theme: jekyll-theme-midnight
 plugins:
   - jekyll-feed
 
