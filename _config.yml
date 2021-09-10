@@ -28,7 +28,7 @@ twitter_username: JohnWinko
 github_username:  john-winko
 
 # Build settings
-theme: minima
+remote_theme: daattali/beautiful-jekyll
 plugins:
   - jekyll-feed
 
