@@ -14,5 +14,5 @@ I am picking the Agile approach. I have a good idea of what features the app nee
 
 I have a long history of loving to hate IDEs. When I started coding with Java, NetBeans was *so cool* until I realized how slow it was compared to paid versions. Visual Studio was out of my price range (until Microsoft came to their senses with a community edition), but I have had a taste of many and there are endless debates to which is *best*. For me, I do not want all the bells and whistles *yet* since it may become and unnecessary roadblock. Luckily, I am financially capable of having a few paid products to help me along the way and the cost/benefit of using Rider and WebStorm is a no-brainer for me.  As I get to know what exactly I want/need from the IDE for a full-time basis, I am sure my preference of IDE/Tools will change in the future.
 
-# [Simple Features List]( https://github.com/john-winko/POEAcolyte/blob/85b8622eea1ef2c9c791f50de4986fc3af5cb0de/Features.md)
+# [Simple Features List]( https://github.com/john-winko/PoeAcolyte/blob/6a3038cbcebbf237c155202f3654a11c9fdf9ccd/Features.md)
 
