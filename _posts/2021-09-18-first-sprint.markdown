@@ -12,12 +12,74 @@ private void InfiniteLoop(){
 		var currentPosition = _lastIndex
 		using var file = File.Open(_filePath, FileMode.Open, FileAccess,Read, FileShare.ReadWrite);
 		_lastIndex = file.Length - 1;
+		
 		If (_lastIndex <= currentPosition) continue;
+		
 		file.Position = currentPosition;
 		using var reader = new StreamReader(file);
-		while (!reader.EndOfStream){
+		
+		while (!reader.EndOfStream)
+		{
 			ParseEntry(reader.ReadLine());
 		}
 	}
 }
+~~~
+
+While this may still be the best option, I will try to maintain an open file stream to the client.txt file and check it on a 2 second interval.
+
+~~~ csharp
+private void TimerOnElapsed(object sender, ElapsedEventArgs e)
+{
+    if (_streamReader.EndOfStream) return;
+    
+    try
+    {
+        var changes = _streamReader.ReadToEnd();
+        FileChanged?.Invoke(this, new FileChangedEventArgs(changes));
+    }
+    catch (Exception exception)
+    {
+        Console.WriteLine(exception);
+    }
+}
+~~~
+
+Another feature that had to be coded in was cross thread calls. Events fired on a non-UI thread cannot be invoked on a UI thread. To solve this without an overabundance of:
+
+~~~ csharp
+if (this.textBox1.InvokeRequired)
+{ 
+    SetTextCallback d = new SetTextCallback(SetText);
+    this.Invoke(d, new object[] { text });
+}
+else
+{
+    this.textBox1.Text = text;
+}
+~~~
+
+I decided just to write and extension class:
+ 
+~~~ csharp
+public static class CrossThreadExtensions
+{
+    public static void PerformSafely(this Control target, Action action)
+    {
+        if (target.InvokeRequired)
+        {
+            target.Invoke(action);
+        }
+        else
+        {
+            action();
+        }
+    }
+}
+~~~
+
+Now, all that must be done is create a lambda action:
+
+~~~ csharp
+_textBox.PerformSafely(() => _textBox.Text += text);
 ~~~
