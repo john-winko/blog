@@ -8,7 +8,7 @@ In my previous post, I had a simple markdown file of features to implement with 
 
 My first task will be transferring my features list into a GitHub project (in this case, the alpha and future features projects). From there, I can start planning out my sprints, what features need to be completed in each how much time I think it will take each to complete using a [Story Point system]( https://www.atlassian.com/agile/project-management/estimation) . I will do a quick sprint to start for the most basic of functionality and recycle issues as extra features are needed.
 
-![Project Plan]({{site.url}}/images/ProjectPlan1.png)
+![Project Plan](https://raw.githubusercontent.com/john-winko/blog/main/Images/ProjectPlan1.png)
 
 The next sprint will be setting up a brokering system to handle state information about the game client, different types of log entries and their corresponding events and generating UI elements based on each.
 
