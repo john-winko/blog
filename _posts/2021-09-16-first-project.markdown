@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "First Project"
-date:   2021-09-16 20:04:30 -0400
+date:   2021-09-16
 categories: journey
 ---
 

@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Project Planning"
-date:   2021-09-09 20:04:30 -0400
+date:   2021-09-17
 categories: journey
 ---
 In my previous post, I had a simple markdown file of features to implement with a promise to keep it up to date as features are delivered or new ones queued. I thought having a versioned document would be a good way to show progress as everything gets coded and tested, but after some reflection and my desire to try to get into the “Agile” mindset, I will be using GitHub’s Projects feature to delineate, track and update the projects progress.  This does mean I will lose any snapshot of what my Scrum/Kanban board will look like so I will have to include screenshots for a broad overview. Those with a more vested interest can dig deeper through filters to see which notes were changed/updated through GitHub’s version history.
