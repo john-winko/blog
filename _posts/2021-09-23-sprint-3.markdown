@@ -1,6 +1,8 @@
 ---
-layout: post title:  "Sprint 3!"
-date:   2021-09-23 categories: journey
+layout: post 
+title:  "Sprint 3!"
+date:   2021-09-23 
+categories: journey
 ---
 ![Sprint 2](https://raw.githubusercontent.com/john-winko/blog/main/Images/Sprint2.png)
 
@@ -99,6 +101,10 @@ due to [local laws]( http://koreanlii.or.kr/w/images/0/0e/KoreanDPAct2011.pdf).
 I fell into the trap of coding without documenting and that has left me with little more to discuss since memory fades
 quickly when going to revisit what code changes were made (and why). I also only had 3 commits, 2 of which were code
 reviews. Going forward, I am going to be more descriptive in the commit messages as well as doing them more often.
+
+Total time coding: ~6 hours
+
+Total time in videos/reference: ~6 hours
 
 ![Sprint 2](https://raw.githubusercontent.com/john-winko/blog/main/Images/Sprint3.png)
 
