@@ -13,7 +13,9 @@ at the onset of the project, I decided to switch over to Visual Studio and just 
 a point that can be considered feature complete, I will make a long sprint for converting the projects from WinForms to
 MAUI in .Net 6 after its release in November (while also testing out VS 2022). The changeover to Visual Studio was not
 seamless and pulling the project from Git caused all sorts of issues with folders not being recognized and files failing
-to load. After spending about an hour closing/reopening/fidgeting with setting I became resolved I would just have to
+to load. 
+
+After spending about an hour closing/reopening/fidgeting with setting I became resolved I would just have to
 start over and manually bring in files/code with a new project. So, I created a new project on GitHub call
 PoeCompanion (to not overwrite or conflict with the history I already started with that project) and started filling out
 the project 1 for 1 copy/pasting code in each file. After doing this for about another hour, I noticed the little
@@ -39,7 +41,9 @@ or impactful refactoring pass. Another tricky component I came across is that te
 events is executed on the UI thread. Once I tested it on a live game session, I had multiple cross-thread errors. I
 forgot to explicitly make sure any UI interactions that occur from a background event needs to be performed safely using
 the *CrossThreadExtensions* class I mentioned last sprint. Once I wired up the events correctly the exceptions went
-away. I personally did not want to see all the thread exit and .pdb loading information in the debug window since I
+away. 
+
+I personally did not want to see all the thread exit and .pdb loading information in the debug window since I
 specifically have *debug.Print()* statements to help verify my program is or is not working as intended. Luckily,
 turning them off was as easy as a right click and unchecking those message options (I honestly thought I would have to
 dig deep into some config files and manually tweak some settings). Another setting that didn’t perform quite as I
