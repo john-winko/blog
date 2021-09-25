@@ -1,0 +1,94 @@
+---
+layout: post 
+title:  "Sprint 2!"
+date:   2021-09-21 
+categories: journey
+---
+One quality of life that I did not consider was that the JetBrains Rider IDE did not allow for design time previews on
+.Net 5 projects (support theoretically will come in .Net 6, but by then everyone would start migrating to MAUI). While
+it is entirely possible to code out the UI elements manually, timewise I do not want to spend my time in the weeds
+trying to arrange UI elements in code rather than simply through a designer. Additionally, I had a previous issue with
+Rider not supporting .resx files or .settings files which work out of the box with Visual Studio. So, since I am still
+at the onset of the project, I decided to switch over to Visual Studio and just use the ReSharper plugin. After I get to
+a point that can be considered feature complete, I will make a long sprint for converting the projects from WinForms to
+MAUI in .Net 6 after its release in November (while also testing out VS 2022). The changeover to Visual Studio was not
+seamless and pulling the project from Git caused all sorts of issues with folders not being recognized and files failing
+to load. After spending about an hour closing/reopening/fidgeting with setting I became resolved I would just have to
+start over and manually bring in files/code with a new project. So, I created a new project on GitHub call
+PoeCompanion (to not overwrite or conflict with the history I already started with that project) and started filling out
+the project 1 for 1 copy/pasting code in each file. After doing this for about another hour, I noticed the little
+squiggles from the PoeAcolyte project disappeared. I built the project and viola… build success with no errors. Visual
+Studio apparently had A LOT of background work to do, and I would have saved myself around 2 hours of headaches if I
+just launched the project after a fresh install and just grabbed some coffee and a movie. Now that the PoeAcolyte
+project is running with Visual Studio, I archived the PoeCompanion project and will continue development as previous.
+There were other headaches during this sprint. The TopMost property on forms apparently doesn’t work correctly until the
+Show() function is called [link here]( https://stackoverflow.com/questions/16862057/this-topmost-true-not-working). I
+spent a cumulative total of about 2 hours trying to get a LINQ query to properly filter by a string comparison until I
+gave up and made a class method for comparison since it worked.
+
+~~~ csharp
+var matches = (from temp in Interactions where temp.Entry.Player == player select temp);
+var matches = from temp in Interactions where temp.Entry.Player.Equals( player) select temp;
+var matches = Interactions.Where(interaction => interaction.Entry.Player.Contains(player));
+~~~
+
+I have a sticky note to revisit later with fresh eyes to clean up my code. My folder structure was also getting a bit
+out of hand for how simple the project currently is, and I refactored most of the interfaces into their implementing
+class. I will refactor these out later when the structure is more “sealed” and less likely to get a renaming convention
+or impactful refactoring pass. Another tricky component I came across is that testing log entries and their associated
+events is executed on the UI thread. Once I tested it on a live game session, I had multiple cross-thread errors. I
+forgot to explicitly make sure any UI interactions that occur from a background event needs to be performed safely using
+the *CrossThreadExtensions* class I mentioned last sprint. Once I wired up the events correctly the exceptions went
+away. I personally did not want to see all the thread exit and .pdb loading information in the debug window since I
+specifically have *debug.Print()* statements to help verify my program is or is not working as intended. Luckily,
+turning them off was as easy as a right click and unchecking those message options (I honestly thought I would have to
+dig deep into some config files and manually tweak some settings). Another setting that didn’t perform quite as I
+expected was tooltips. I was using them to show message history, but they would only show when the control actually had
+focus. Apparently, you have to set the property *ShowAlways* in order for tooltips to show up when a control is not
+focused. Before pulling the sprint I did a fairly hefty code review. There was a lot of code that I copied in from my
+previous attempts at the app which was either unoptimized or did not follow good coding practice. I was relying on
+try/catch for validating a date parsing mechanism, but a few videos (sorry missing the links) mentioned catching
+exceptions has a lot of overhead capturing the stack trace even if it not being used. Originally the code was:
+
+~~~ csharp
+try
+{
+    // Date and time split by first two spaces "2021/07/04 08:38:45 67873453 bad [INFO Client 22384] @From Fu..."
+    TimeStamp = DateTime.Parse(raw.Split(' ')[0] + " " + raw.Split(' ')[1], new DateTimeFormatInfo());
+    SetLogEntryType();
+    IsValid = true;
+}
+catch (Exception)
+{
+    //Debug.Print("tossing invalid log " + e.Message);
+    IsValid = false;
+}
+~~~
+
+But changed to:
+
+~~~ csharp
+IsValid = false;
+
+// needs at least one space for correct date and time input before trying to parse (index error if only 1 element)
+var sections = raw.Split(' ');
+if (sections.Length < 2) return;
+if (!DateTime.TryParse(sections[0] + " " + sections[1], new DateTimeFormatInfo(), DateTimeStyles.None, out var parsedDate)) return;
+
+TimeStamp = parsedDate;
+SetLogEntryType();
+IsValid = true;
+~~~
+
+Unfortunately, my SingleTrade and BulkTrade UI’s are violating DRY since the designer does not play nicely with
+inherited classes, but I will attempt to clean up its inheritance issues later. Another questionable decision I made was
+to seal the override for updating Single/Bulk trade classes. This means I can’t inherit from them nicely so I may have
+to refactor their design later on or use a builder for generating them correctly.
+
+# [Sprint 2 Commit](https://github.com/john-winko/PoeAcolyte/tree/fff131065edaf2fe246e21f4d1f5587efc588e55)
+
+Total time coding: ~8 hours 
+
+Total time in videos/reference/chasing my tail: ~12 hours
+
+

@@ -1,0 +1,105 @@
+---
+layout: post title:  "Sprint 3!"
+date:   2021-09-23 categories: journey
+---
+![Sprint 2](https://raw.githubusercontent.com/john-winko/blog/main/Images/Sprint2.png)
+
+This sprint is mostly a lot of copy/paste of functionality of previous iterations of the application and building the UI
+elements. The trade UI’s for Single and Bulk trades were purposefully simple in design. I set up a simple context menu
+for game actions such as sending trade requests, invites, kicking players etc. Originally I was going to use the plugin
+AutoItX since I used it in my programs before, but found out quickly the NuGet for it was not compatible with .Net 5.
+Luckily *SendKeys* works out of the box for sending keystrokes to an application (while it is focused; more on that in a
+minute), but one glaring issue with *SendKeys* though was how abysmally slow it sends keystrokes. Sending a long string
+of text can take seconds, which in a fast-paced ARPG is unacceptable. To get around this limitation, I decided to just
+put the text in the clipboard and send [CTRL]+[V] keystrokes which greatly improved “typing” performance.
+
+~~~ csharp
+SendKeys.Send("{Enter}");
+Clipboard.SetText(message);
+SendKeys.Send("^V");
+~~~ 
+
+The game client messages are being brokered by *GameClientCommand* using actions to wire up to the onClick() of *
+ToolStripMenuItem*:
+
+~~~ csharp
+public class GameClientCommand : ToolStripMenuItem
+{
+     private void SetAction()
+     {
+        switch (CommandTypeEnum)
+        {
+            case GameClientCommandTypeEnum.Invite:
+                Text = @"Invite";
+                _action = Invite;
+                break;
+            case GameClientCommandTypeEnum.Trade:
+                Text = @"Trade";
+                _action = Trade;
+                break;
+            …
+        }
+    }
+    
+    public static Action<IPoeTradeInteraction> Invite => interaction =>
+    {
+        PoeClient.GetInstance().SendChatMessages(new[]
+        {
+            $@"@{interaction.Entry.Player} Your item is ready for pickup",
+            $@"/invite {interaction.Entry.Player}"
+        });
+        interaction.LastChatConsoleCommand = GameClientCommandTypeEnum.Invite;
+    };
+
+    public static Action<IPoeTradeInteraction> Trade => interaction =>
+    {
+        PoeClient.GetInstance().SendChatMessages(new[]
+        {
+            $@"/tradewith {interaction.Entry.Player}"
+        });
+        interaction.LastChatConsoleCommand = GameClientCommandTypeEnum.Trade;
+    };	
+}
+~~~ 
+
+The *PoeClient* class holds a reference to the window handle of the game client if it exists in *_poeProcess*. There is
+a timer that runs search for the game client if *_poeProcess* is null which polls every 5 seconds. While the .Net
+framework wraps a lot of interop, there are certain methods that still must be imported. I created a WIN32 class to
+handle all the DLLImports and type declarations. Putting all that together the snippets look like:
+
+~~~ csharp
+[DllImport("USER32.DLL")]
+public static extern bool SetForegroundWindow(IntPtr hWnd);
+
+public static Process GetPoeProcess()
+{
+    var result = (from proc in Process.GetProcesses()
+            where proc.ProcessName is
+                "PathOfExile" or …
+            select proc)
+        .ToList();
+    return result.Any() ? result.First() : null;
+}
+
+public bool SetFocus()
+{
+    if (_poeProcess is null) return false;
+    WIN32.SetForegroundWindow(_poeProcess.MainWindowHandle);
+    return true;
+}
+~~~
+
+After reflecting for a bit, I decided to trim down the interactions classes. The *PoeLogMessage* was only a reiteration
+of *PoeLogEntry* and refactoring the iteraction container handling logic to broker messages made *PoeWhisper*
+redundant. *PoeInteraction* also was renamed *PoeTradeInteraction* so that some of the logic can be handled in a higher
+layer. In the future, there will be other interactions that are not specifically tied to the log and allows for future
+updates if screen captures are required over text files (Korean game clients messages do not show in the Client.txt file
+due to [local laws]( http://koreanlii.or.kr/w/images/0/0e/KoreanDPAct2011.pdf).
+
+I fell into the trap of coding without documenting and that has left me with little more to discuss since memory fades
+quickly when going to revisit what code changes were made (and why). I also only had 3 commits, 2 of which were code
+reviews. Going forward, I am going to be more descriptive in the commit messages as well as doing them more often.
+
+![Sprint 2](https://raw.githubusercontent.com/john-winko/blog/main/Images/Sprint3.png)
+
+
