@@ -4,9 +4,9 @@ title:  "First Sprint"
 date:   2021-09-18
 categories: journey
 ---
-# [Sprint 1 Commit](https://github.com/john-winko/PoeAcolyte/tree/5dffd278e0e12515d9fc7a154a3ef9d1107d5039)
-
 A previous lesson learned is some .Net libraries do not have the expected or wanted functionality that you would expect.  I spent hours trying to debug why the [FileSystemWatcher]( https://docs.microsoft.com/en-us/dotnet/api/system.io.filesystemwatcher?view=net-5.0) would randomly not work (fire events). After some deep diving in Stack Overflow and some copious Google-Fu, I found out that if an application and some cases the OS such as windows 10 does not close the file or flush the file stream, the OS does not recognize any changes to a file or directory. In the case of Path of Exile, it maintains an open file stream to the Client.txt log file and nothing is signaled for changes in the FileSystemWatcher class.  Previously I solved this by creating an infinite loop:
+
+# [Sprint 1 Commit](https://github.com/john-winko/PoeAcolyte/tree/5dffd278e0e12515d9fc7a154a3ef9d1107d5039)
 
 ~~~ csharp
 private void InfiniteLoop(){

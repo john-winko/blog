@@ -4,8 +4,6 @@ title:  "Sprint 3!"
 date:   2021-09-23 
 categories: journey
 ---
-![Sprint 2](https://raw.githubusercontent.com/john-winko/blog/main/Images/Sprint2.png)
-
 This sprint is mostly a lot of copy/paste of functionality of previous iterations of the application and building the UI
 elements. The trade UI’s for Single and Bulk trades were purposefully simple in design. I set up a simple context menu
 for game actions such as sending trade requests, invites, kicking players etc. Originally I was going to use the plugin
@@ -14,6 +12,8 @@ Luckily *SendKeys* works out of the box for sending keystrokes to an application
 minute), but one glaring issue with *SendKeys* though was how abysmally slow it sends keystrokes. Sending a long string
 of text can take seconds, which in a fast-paced ARPG is unacceptable. To get around this limitation, I decided to just
 put the text in the clipboard and send [CTRL]+[V] keystrokes which greatly improved “typing” performance.
+
+![Sprint 2](https://raw.githubusercontent.com/john-winko/blog/main/Images/Sprint2.png)
 
 ~~~ csharp
 SendKeys.Send("{Enter}");
