@@ -1,0 +1,135 @@
+---
+layout: post title:  "Sprint 5!"
+date:   2021-09-28 categories: journey
+---
+At this point, the application is almost to a Minimum Viable Product. There were a few small tweaks to get things ready
+such as allowing for decimals in pricing information which also required some code changes on the Regex, changing the
+Regex to not be compiled since they are all static references, renaming CellHighlight to GridOverlay and
+GridOverlayCells. There were a few quality of life features that also were added: trimming down the number of quick
+actions based on single mouse clicks, leaving the party after a trade is complete and adding a message history from the
+player on the right click context menu for the trade.
+
+I created a resource file and associated a picture dictionary for lookups based on the LogEvent currency string provided:
+
+~~~ csharp
+public static class CurrencyConverter
+{
+    private static readonly Dictionary<string, Image> CurrencyDictionary= new ()
+    { 
+        { "c", CurrencyImages.CurrencyRerollRare },
+        { "chaos", CurrencyImages.CurrencyRerollRare },
+        { "chaos orb", CurrencyImages.CurrencyRerollRare },
+    
+        { "alt", CurrencyImages.CurrencyRerollMagic },
+        // Lots more
+    };
+
+    public static Image GetFromString(string input)
+    {
+        input = input is null ? string.Empty : input.ToLower();
+        return CurrencyDictionary.ContainsKey(input) ? CurrencyDictionary[input] : Icons.question_mark;
+    }
+}
+~~~
+
+I also implemented click and drag functionality for the resizing mode for the UI elements:
+
+~~~ csharp
+private bool _dragging;
+private Point _dragCursorPoint;
+private Point _dragFormPoint;
+
+private void EnableDragging()
+{
+    _lblDescription.MouseDown += (sender, args) => 
+    {
+        _dragging = true;
+        _dragCursorPoint = Cursor.Position;
+        _dragFormPoint = this.Location;
+    };
+    _lblDescription.MouseMove += (sender, args) =>
+    {
+        if (!_dragging) return;
+        var dif = Point.Subtract(Cursor.Position, new Size(_dragCursorPoint));
+        this.Location = Point.Add(_dragFormPoint, new Size(dif));
+    };
+    _lblDescription.MouseUp += (sender, args) => { _dragging = false;};
+}
+~~~
+
+To minimize the number of open trade windows, I implemented comparison methods for if a log entry is a duplicate or
+based on the same item. This is used when brokering to determine if a log entry makes a new trade window or pushed into
+an existing one:
+
+~~~ csharp
+public bool IsDuplicate(IPoeLogEntry entry)
+        {
+            var test = IsSameItem(entry);
+            test &= Player == entry.Player;
+            return test;
+
+        }
+
+        public bool IsSameItem(IPoeLogEntry entry)
+        {
+            var test = true;
+            test &= Top == entry.Top;
+            test &= Left == entry.Left;
+            test &= Item == entry.Item;
+            test &= StashTab == entry.StashTab;
+            return test;
+        }
+~~~
+
+Since I added duplicate item request functionality to a specific item trade, when Complete() is called, it tries to find
+another active player request and only disposes if one is not found:
+
+~~~ csharp
+protected void SetActivePlayer(string player)
+{
+    var result = History.Where(p => p.PoeLogEntryType == Entry.PoeLogEntryType && p.Player == player).ToArray();
+    if (result.Any())
+    {
+        Entry = result.First();
+        Interaction_UI.PerformSafely(Update_UI);
+    }
+    else
+    {
+        Debug.Print("Could not find");
+    }
+}
+
+protected bool SetActivePlayer()
+{
+    var result = History.Where(p => p.PoeLogEntryType == Entry.PoeLogEntryType).ToArray();
+    if (!result.Any()) return false;
+
+    Entry = result.First();
+    Interaction_UI.PerformSafely(Update_UI);
+    return true;
+
+}
+
+public virtual void Complete()
+{
+    // Remove active entry
+    playersToolStripMenuItems.DropDownItems.RemoveByKey(Entry.Player);
+    History.Remove(Entry);
+
+    // Try to set a new one
+    if (SetActivePlayer()) return;
+
+    // Dispose if nothing left
+    InteractionContainer.RemoveInteraction(this);
+}
+~~~
+
+Up next is battle testing the application and checking performance while gaming.
+
+Total time coding: ~11 hours
+
+Total time in videos/reference: ~4 hours
+
+# [Sprint 5](https://github.com/john-winko/PoeAcolyte/commits/Sprint5)
+
+

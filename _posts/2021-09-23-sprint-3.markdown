@@ -21,8 +21,7 @@ Clipboard.SetText(message);
 SendKeys.Send("^V");
 ~~~ 
 
-The game client messages are being brokered by *GameClientCommand* using actions to wire up to the onClick() of *
-ToolStripMenuItem*:
+The game client messages are being brokered by *GameClientCommand* using actions to wire up to the onClick() of *ToolStripMenuItem*:
 
 ~~~ csharp
 public class GameClientCommand : ToolStripMenuItem

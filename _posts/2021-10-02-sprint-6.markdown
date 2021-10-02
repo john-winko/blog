@@ -1,0 +1,76 @@
+---
+layout: post title:  "Sprint 6!"
+date:   2021-10-01 categories: journey
+---
+
+The battle test! Finally, a (hopefully) working product that I can start working on features independently. A few small
+issues cropped up that were easily solved. My home panel is also occluded when I turn on edit mode for the UI elements.
+I temporarily solved this by commenting out it being edited during the mode and later added a click handler to hide it
+when clicked with right mouse button. But then a major issue cropped up: my program was eating GIGS of memory. NOT GOOD!
+I know VS has a few good tooling options for tracing memory leaks, so I decided to boot it up and give it a try.
+
+~~~
+System.NullReferenceException
+  HResult=0x80004003
+  Message=Object reference not set to an instance of an object.
+  Source=System.Private.CoreLib
+  StackTrace:
+   at System.Runtime.CompilerServices.CastHelpers.Unbox(Void* toTypeHnd, Object obj)
+-->at PoeAcolyte.GameClient.get_TradeUITop() <--
+   at PoeAcolyte.UI.InteractionPanel..ctor()
+   at PoeAcolyte.UI.MainOverlay..ctor()
+   at PoeAcolyte.Program.Main()
+~~~
+
+Another major issue crops up: All the settings for UI elements are getting a null reference. Come to find out, the
+.settings file is not being properly referenced in the release version. I have almost exclusively stuck in debug mode to
+catch any bugs that crop up and to manually step through code to verify the execution occurs as I planned. Well, I can’t
+trace memory leaks in debug mode, so I need to get those settings to persist. I also can’t hard code a work around since
+the UI element locations are necessary for release versions. Google, Stack overflow and Code Project have *some*
+articles relating to the .settings file but finding solutions was worse than a needle in a haystack. Most results were
+older than 5 years old and none of them specifically spoke about why .settings would work in debug and not release
+version.
+
+Before I even begin trying to test for the memory leak, I must refactor the project to not use .settings and instead
+serialize/deserialize classes instead. Upside is now I can use custom classes for data types, but the downside is I
+remember how many issues I had with serialization in the past and how easy it is to leave open references. I made a
+singleton class called AppSettings and a data type class UiSettings. Even though it's probably not the best practice, I
+also integrated the FrameControl used for edit mode into the UiSettings class since it would update the size and
+location of the control. A problem I quickly came across is that JSON deserialize does not play well with non-public
+constructors or custom constructors. As a workaround, I made the default constructor public with a note to not use (I
+will most likely revisit this class in depth later).
+
+Again, even though not best practice, I implemented functions for starting/stopping the edit mode for the UI elements as
+well as capturing the FrameControl data. For simplicity, I am using File.WriteAll() and File.ReadAll() for the
+serialize/deserialize which again I will be revisiting later since it will need more error handling before being
+production ready. Also, since controls cannot be readily serialized, I had to implement GenerateFrame() and call it
+explicitly after deserialization in order to create an instance of FrameControl for each class. All that was left was to
+rewire all the references to the old .settings file to the new instance of AppSettings. The new structure made some
+classes like StashTab and HomeRibbon irrelevant since any control location and size could be persisted, so those classes
+were removed.
+
+Now time to find out what is hogging all that memory! Out the gate, each new trade request that opens a new window uses
+up ~150 MB of memory. Quite a lot, but not the end of the world. Until you encounter dozens of different items being
+requested and the total memory jumps in the gigabyte range. I see a lot of Regex references. Since all the methods in
+the Regex class is static, I changed it to being used as an instance. While there may have been a performance gain (the
+number of instances did not change in the memory profiler), it was insignificant to whatever else is bloating each form
+creation.
+
+One key component though is even after the trade is closed (and supposedly disposed of), the memory allocation does not
+go down and there are no calls from Garbage Collection. So, my first step is tracing through my code and making sure I
+did not leave any event subscriptions open. Didn't find any. Next I tried forcing GC.Collect(). The memory profiler
+showed a GC call **BUT** the memory allocation still did not decrease. I still have an open reference somewhere :( I
+spent the entire day stepping through code, looking up common memory leak errors with C# until finally I came across
+the [docs article](https://docs.microsoft.com/en-us/troubleshoot/dotnet/framework/winform-app-use-settooltip-not-release-memory)
+about tooltips. Sure enough, once I put in a ToolTip.RemoveAll() in the disposal pattern, the GC finally released the
+allocation. Unfortunately, the GC does not collect as often as I like, and I did not want to journey down that rabbit
+hole too far. For now, I am leaving the manual GC.Collect() in the form disposal even though I will be a performance hit
+and will try to revisit the performance impacts later.
+
+Total time coding: ~8 hours
+
+Total time in videos/reference: ~20 hours
+
+[Sprint 6](https://github.com/john-winko/PoeAcolyte/commits/Sprint6)
+
+

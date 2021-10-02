@@ -1,0 +1,100 @@
+---
+layout: post title:  "Sprint 4!"
+date:   2021-09-26 categories: journey
+---
+The UI elements are resized/relocated based on the game client. Currently, the user manually adjusts those elements to a
+specific area of the screen, but those values need to persist between application sessions. I utilized a .settings file
+to save/load those values at runtime, unfortunately VS does not have friendly support for custom classes and the google
+search results for how to accomplish this were severely lacking. As a workaround, I just used the built-in datatypes and
+moved on.
+
+~~~ xml
+<Setting Name="TradeUILeft" Type="System.Int32" Scope="User">
+    <Value Profile="(Default)">0</Value>
+</Setting>
+<Setting Name="TradeUITop" Type="System.Int32" Scope="User">
+    <Value Profile="(Default)">0</Value>
+</Setting>
+<Setting Name="TradeUISize" Type="System.Drawing.Size" Scope="User">
+    <Value Profile="(Default)">500, 500</Value>
+</Setting>
+<Setting Name="StashUILeft" Type="System.Int32" Scope="User">
+    <Value Profile="(Default)">0</Value>
+</Setting>
+<Setting Name="StashUITop" Type="System.Int32" Scope="User">
+    <Value Profile="(Default)">0</Value>
+</Setting>
+<Setting Name="StashUISize" Type="System.Drawing.Size" Scope="User">
+    <Value Profile="(Default)">500, 500</Value>
+</Setting>
+~~~
+
+I copy/pasted what I previously used to create a semi-transparent overlay on the screen based on the item’s location and
+moved the interop code into the WIN32 class. I did need to have the overlay region disappear after being clicked on but
+could not use an OnClick() event since its opacity was not 100%. This meant I had to observe mouse clicks globally.
+Although I am sure with enough time and energy, I could write the hooks necessary to capture and handle mouse events, I
+knew it was asking for trouble. In the end, I just downloaded the Gma.System.MouseKeyHook NuGet and used that even
+though it doesn't’t strictly support .Net 5. I did have some exceptions that seemingly randomly cropped up using static
+subscription to events. This was (hopefully) solved by creating a local variable for the hook and putting its disposal
+in the CellHighlight disposal.
+
+I decided to refactor out the logic of brokering LogEntries from the InteractionPanel to the PoeBroker class under the
+idea of “Single Responsibility Principle.” I added methods to the interaction panel to handle which case each log event
+would fire. During the code review, there were many small corrections for naming conventions and adding null checks for
+first time usages (such as checking if a player is busy).
+
+~~~ csharp
+public class PoeBroker : IDisposable
+{
+    private readonly FileChangeMonitor _fileChangeMonitor;
+    private readonly PoeClient _poeClient;
+
+    private PoeBroker(IInteractionContainer interactionContainer) //, string clientLogPath = POEPATH)
+    {
+        InteractionContainer = interactionContainer;
+        _fileChangeMonitor = new FileChangeMonitor(GameClient.Default.ClientLogPath);
+        _fileChangeMonitor.FileChanged += ClientLogFileChanged;
+        _poeClient = PoeClient.GetInstance();
+        _poeClient.GameClientOpened += OnGameClientOpened;
+        _poeClient.GameClientClosed += OnGameClientClosed;
+    }
+    
+    private void ClientLogFileChanged(object sender, FileChangedEventArgs e)
+    {
+        //var logEntries = IPoeLogEntry.ParseStrings(e.Changes);
+        foreach (var entry in IPoeLogEntry.ParseStrings(e.Changes).Where(log => log.IsValid)) //logEntries)
+            switch (entry.PoeLogEntryType)
+            {
+                case PoeLogEntryTypeEnum.Whisper:
+                    InteractionContainer.NewWhisper(entry);
+                    break;
+                case PoeLogEntryTypeEnum.PricedTrade:
+                case PoeLogEntryTypeEnum.UnpricedTrade:
+                case PoeLogEntryTypeEnum.BulkTrade:
+                    InteractionContainer.NewTradeRequest(entry);
+                    break;
+                case PoeLogEntryTypeEnum.AreaJoined:
+                    InteractionContainer.TraderInArea(entry, true);
+                    break;
+                case PoeLogEntryTypeEnum.AreaLeft:
+                    InteractionContainer.TraderInArea(entry, false);
+                    break;
+                case PoeLogEntryTypeEnum.YouJoin:
+                    PlayerArea = entry.Area;
+                    InteractionContainer.YouJoined(entry);
+                    break;
+                case PoeLogEntryTypeEnum.SystemMessage:
+                    break;
+                default:
+                    Debug.Print("out of bounds");
+                    break;
+            }
+    }
+}
+~~~
+
+# [Sprint 4](https://github.com/john-winko/PoeAcolyte/commits/Sprint4)
+
+Total time coding: ~9 hours
+
+Total time in videos/reference: ~7 hours
