@@ -1,6 +1,8 @@
 ---
-layout: post title:  "Sprint 5!"
-date:   2021-09-28 categories: journey
+layout: post 
+title:  "Sprint 5!"
+date:   2021-09-28 
+categories: journey
 ---
 At this point, the application is almost to a Minimum Viable Product. There were a few small tweaks to get things ready
 such as allowing for decimals in pricing information which also required some code changes on the Regex, changing the

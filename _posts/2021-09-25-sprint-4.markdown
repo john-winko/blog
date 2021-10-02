@@ -1,6 +1,8 @@
 ---
-layout: post title:  "Sprint 4!"
-date:   2021-09-26 categories: journey
+layout: post 
+title:  "Sprint 4!"
+date:   2021-09-26 
+categories: journey
 ---
 The UI elements are resized/relocated based on the game client. Currently, the user manually adjusts those elements to a
 specific area of the screen, but those values need to persist between application sessions. I utilized a .settings file

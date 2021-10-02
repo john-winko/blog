@@ -1,8 +1,9 @@
 ---
-layout: post title:  "Moving Forward!"
-date:   2021-10-02 categories: watchbill journey
+layout: post 
+title:  "Moving Forward!"
+date:   2021-10-02 
+categories: watchbill journey
 ---
-
 So now I have an MVP for the Path of Exile – Acolyte project. The minimum features work although there is plenty of
 optimization left to be done. All the new features that I would want to implement are either going to require web API
 calls to the Grinding Gear Games servers using OAuth and/or some fancy graphical capture to determine stateful

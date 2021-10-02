@@ -1,8 +1,9 @@
 ---
-layout: post title:  "Sprint 6!"
-date:   2021-10-01 categories: journey
+layout: post 
+title:  "Sprint 6!"
+date:   2021-10-01 
+categories: journey
 ---
-
 The battle test! Finally, a (hopefully) working product that I can start working on features independently. A few small
 issues cropped up that were easily solved. My home panel is also occluded when I turn on edit mode for the UI elements.
 I temporarily solved this by commenting out it being edited during the mode and later added a click handler to hide it
